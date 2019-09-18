@@ -1,4 +1,5 @@
 ﻿using Dry.Logs;
+using Nito.AsyncEx;
 using System;
 using System.Threading.Tasks;
 using static System.Console;
@@ -8,7 +9,9 @@ namespace Demo
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main() => AsyncContext.Run(MainAsync);
+
+        static async Task MainAsync()
         {
             Op.Log.Subscribe(WriteLine);
             using (new Op())
