@@ -36,7 +36,7 @@ For example, the following code:
 
 Will generate:
 
-```csharp
+```
     MainAsync took 116 ms
       Alpha function took 109 ms
         BetaAsync took 108 ms
