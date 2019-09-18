@@ -1,0 +1,2 @@
+# drylogs
+Operation logging library
