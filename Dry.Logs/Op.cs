@@ -36,12 +36,12 @@ namespace Dry.Logs
         {
             Stopwatch.Stop();
             Context.Value = Parent;
-            if(Parent != null)
+            if(Parent == null)
+                Subject.OnNext(ToString());
+            else
                 lock(Parent.Frame)
                 lock(Frame)
                     Parent.Frame.AddRange(Frame);
-            else
-                Subject.OnNext(ToString());
         }
 
         public void Trace(string text)
