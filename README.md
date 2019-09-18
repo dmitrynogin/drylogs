@@ -7,6 +7,7 @@ This component traces execution in a logical order instead of chronological as e
 
 For example, the following code:
 
+```csharp
         static async Task MainAsync()
         {
             Op.Log.Subscribe(WriteLine);
@@ -31,9 +32,11 @@ For example, the following code:
                 op.Trace("Continue");
             }
         }
+```
 
 Will generate:
 
+```csharp
     MainAsync took 116 ms
       Alpha function took 109 ms
         BetaAsync took 108 ms
@@ -51,6 +54,7 @@ Will generate:
         BetaAsync took 111 ms
           Waiting... after 0 ms
           Continue after 111 ms
+```
 
 Which is a way more readable…
 
