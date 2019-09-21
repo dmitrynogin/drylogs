@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
+using System.Xml.Linq;
 using static System.Environment;
 using static System.String;
 
@@ -21,25 +23,25 @@ namespace Dry.Logs
             Parent = Context.Value;
             Context.Value = this;
             Stopwatch = Stopwatch.StartNew();
-            Indent = Parent == null ? "" : Parent.Indent + "  ";
-            Frame = new List<(string, Func<string>)>();
-            Frame.Add((Indent + text, () => $"took {Stopwatch.ElapsedMilliseconds} ms"));
+            Level = Parent == null ? 0 : Parent.Level + 1;
+            Frame = new List<(int, string, Func<string>)>();
+            Frame.Add((Level, text, () => $"took {Stopwatch.ElapsedMilliseconds} ms"));
         }
 
         Op Parent { get; }
         Stopwatch Stopwatch { get; }
-        string Indent { get; }
+        int Level { get; }
 
-        List<(string Text, Func<string> Time)> Frame { get; }
+        List<(int Level, string Text, Func<string> Time)> Frame { get; }
 
         public void Dispose()
         {
             Stopwatch.Stop();
             Context.Value = Parent;
-            if(Parent != null)
-                lock(Parent.Frame)
-                lock(Frame)
-                    Parent.Frame.AddRange(Frame);
+            if (Parent != null)
+                lock (Parent.Frame)
+                    lock (Frame)
+                        Parent.Frame.AddRange(Frame);
             else
                 Subject.OnNext(ToString());
         }
@@ -47,16 +49,22 @@ namespace Dry.Logs
         public void Trace(string text)
         {
             var ms = $"after {Stopwatch.ElapsedMilliseconds} ms";
-            lock(Frame)
-                Frame.Add((Indent + "  " + text, () => ms));
+            lock (Frame)
+                Frame.Add((Level + 1, text, () => ms));
         }
 
         public override string ToString()
         {
-            lock(Frame)
+            lock (Frame)
                 return Join(NewLine,
                     from row in Frame
-                    select $"{row.Text} {row.Time()}");
+                    select $"{new string(' ', row.Level)}{row.Text} {row.Time()}");
+        }
+
+        public XElement ToXml()
+        {
+            lock (Frame)
+                return Frame.ToXml();
         }
     }
 }
